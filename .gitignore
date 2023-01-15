@@ -1,0 +1,13 @@
+.DS_Store
+.env
+.vscode/
+node_modules/
+build/
+hashes.json
+dist/
+out/
+tests/
+bin/
+*.tgz
+*-lock.json
+*-lock.yaml

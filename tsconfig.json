@@ -1,0 +1,30 @@
+{
+  "ts-node": {
+    "require": ["tsconfig-paths/register"],
+    "files": true,
+    "compilerOptions": {}
+  },
+  "compilerOptions": {
+    "lib": ["es2019", "dom"],
+    "declaration": true,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "noLib": false,
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es2019",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}

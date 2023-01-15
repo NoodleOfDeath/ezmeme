@@ -1,0 +1,71 @@
+{
+  "name": "ezmeme",
+  "description": "A node library that makes the automated generation of memes ez!",
+  "version": "0.0.1",
+  "main": "index.js",
+  "export": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "ezmeme": "dist/cli/ezmeme.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/noodleofdeath/ezmeme/issues",
+    "email": "github@noodleofdeath.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noodleofdeath/ezmeme.git"
+  },
+  "keywords": [
+    "automation",
+    "cli",
+    "command",
+    "command-line",
+    "console",
+    "funny",
+    "gif",
+    "meme",
+    "memes",
+    "redit",
+    "social-media"
+  ],
+  "homepage": "https://github.com/noodleofdeath/ezmeme",
+  "scripts": {
+    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
+    "prepare": "npm run build",
+    "test": "mocha --inline-diffs --timeout 1000000 tests/run.js",
+    "generate-interface": "ts-node ./tools/response-to-interface.ts",
+    "generate-docs": "typedoc"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
+  "dependencies": {
+    "argparse": "^2.0.1",
+    "canvas": "^2.11.0",
+    "highlight.js": "^11.7.0",
+    "styled-components": "^5.3.6"
+  },
+  "devDependencies": {
+    "@types/argparse": "^2.0.10",
+    "@types/node": "^18.11.18",
+    "@types/styled-components": "^5.1.26",
+    "@types/typescript": "^2.0.0",
+    "rimraf": "^4.0.5",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.1.2",
+    "typescript": "^4.9.4"
+  }
+}
