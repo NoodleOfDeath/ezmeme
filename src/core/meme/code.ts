@@ -16,6 +16,7 @@ function removeHTMLChars(str: string): string {
 }
 
 const MIME_TYPES: Record<string, string> = {
+  bf: 'brainfuck',
   cpp: 'cpp',
   h: 'c',
   hpp: 'cpp',
