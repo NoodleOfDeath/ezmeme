@@ -32,11 +32,12 @@ addChoices(snippetSubparser, 'snippets');
 
 const args = parser.parse_args();
 
-type MemeType = {
+type MemeType<T = any> = {
   parser: any;
   title?: TitleLike<CodingMeme>;
   subtitle?: TitleLike<CodingMeme>;
   background?: string;
+  props?: T;
 };
 
 const TYPES: Record<string, MemeType> = {
@@ -56,8 +57,8 @@ const TYPES: Record<string, MemeType> = {
   fte: {
     parser: fteSubparser,
     title: {
-      text: (meme) => `find the errors\n(and how many)`,
-      font: '80% dm mono',
+      text: (meme) => `find the errors\n(hint: there are ${meme.props.count})`,
+      font: '70% dm mono',
     },
     subtitle: {
       text: (meme) => `FTE\nLVL1\n${meme.alias.toUpperCase()}`,
@@ -65,6 +66,7 @@ const TYPES: Record<string, MemeType> = {
       font: 'normal 40px dm mono',
     },
     background: '#111144',
+    props: { count: 3 },
   },
   snippets: {
     parser: snippetSubparser,
@@ -100,10 +102,11 @@ async function main() {
         height: 1200,
         title: TYPE.title,
         subtitle: TYPE.subtitle,
-        padding: 0.1,
+        padding: 0.05,
         code,
         language,
         background: TYPE.background,
+        props: TYPE.props,
       });
 
       console.log('-----', file);

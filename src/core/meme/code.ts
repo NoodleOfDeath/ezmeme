@@ -124,13 +124,15 @@ const TOKEN_STYLES: Record<string, TokenStyle> = {
   },
 };
 
-export class CodingMeme extends TitledMeme {
+export class CodingMeme<T = any> extends TitledMeme {
   code: string;
   language: string;
   alias: string;
   wrapText: boolean;
   wrapColumn: number;
   hangingIndent: number;
+
+  props?: T;
 
   constructor({
     code = '',
@@ -139,6 +141,7 @@ export class CodingMeme extends TitledMeme {
     wrapText = true,
     wrapColumn = 40,
     hangingIndent = 2,
+    props,
     ...other
   }: CodingMeme.ConstructorOptions) {
     super(other);
@@ -150,6 +153,7 @@ export class CodingMeme extends TitledMeme {
     this.wrapText = wrapText;
     this.wrapColumn = wrapColumn;
     this.hangingIndent = hangingIndent;
+    this.props = props;
   }
 
   render(): Promise<void> {
@@ -226,12 +230,13 @@ export class CodingMeme extends TitledMeme {
 }
 
 export namespace CodingMeme {
-  export type ConstructorOptions = TitledMeme.ConstructorOptions<CodingMeme> & {
+  export type ConstructorOptions<T = any> = TitledMeme.ConstructorOptions<CodingMeme<T>> & {
     code?: string;
     language?: string;
     alias?: string;
     wrapText?: boolean;
     wrapColumn?: number;
     hangingIndent?: number;
+    props?: T;
   };
 }
