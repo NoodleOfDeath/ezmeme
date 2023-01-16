@@ -7,24 +7,32 @@ export type Size = {
   height: number;
 };
 
-export type CanvasLike = {
-  canvas: Canvas;
-  ctx: CanvasRenderingContext2D;
-};
+export type RangedSize = {
+  minWidth: number;
+  minHeight: number;
+  maxWidth: number;
+  maxHeight: number;
+}
 
-export type BasicMemeAttributes = Size & {
+export type ContextStyles = {
   stroke: string;
   font: Font;
   lineSpacing: number;
   background: string;
+}
+
+export type BasicMemeAttributes = Size & RangedSize & ContextStyles;
+
+export type CanvasDelegate = {
+  canvas: Canvas;
 };
 
-export type Meme = BasicMemeAttributes & CanvasLike;
+export type Meme = BasicMemeAttributes & CanvasDelegate;
 
 export namespace Meme {
   export type ConstructorOptions =
-    | (Size & Partial<BasicMemeAttributes> & { canvas?: Canvas })
-    | (Partial<Size> & Partial<BasicMemeAttributes> & { canvas: Canvas });
+    | (Size & Partial<BasicMemeAttributes> & Partial<CanvasDelegate>)
+    | (Partial<Size> & Partial<BasicMemeAttributes> & CanvasDelegate);
 }
 
 export class BaseMeme implements Meme {
@@ -37,6 +45,11 @@ export class BaseMeme implements Meme {
   get height(): number {
     return this.canvas.height;
   }
+  
+  minWidth: number;
+  minHeight: number;
+  maxWidth: number;
+  maxHeight: number;
 
   stroke: string;
 
@@ -59,12 +72,20 @@ export class BaseMeme implements Meme {
     canvas,
     width = canvas?.width,
     height = canvas?.height,
+    minWidth = width,
+    minHeight = height,
+    maxWidth = width,
+    maxHeight = height,
     stroke = '#ffffff',
     font,
     lineSpacing = 4,
-    background = '#212121',
+    background = '#000000',
   }: Meme.ConstructorOptions) {
     this.canvas = canvas ?? new Canvas(width, height);
+    this.minWidth = minWidth;
+    this.minHeight = minHeight;
+    this.maxWidth = maxWidth;
+    this.maxHeight = maxHeight;
     this.stroke = stroke;
     this.font = font;
     this.lineSpacing = lineSpacing;

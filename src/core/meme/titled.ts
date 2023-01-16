@@ -1,9 +1,9 @@
 import { Font, Title, TitleLike } from '@/core/components';
 import { BaseMeme, Meme } from '@/core/meme/base';
 
-export class SquareMeme extends BaseMeme {
-  title?: Title<SquareMeme>;
-  subtitle?: Title<SquareMeme>;
+export class TitledMeme extends BaseMeme {
+  title?: Title<TitledMeme>;
+  subtitle?: Title<TitledMeme>;
   padding?: number;
 
   set font(font: Font) {
@@ -12,13 +12,8 @@ export class SquareMeme extends BaseMeme {
     if (this.subtitle) this.subtitle.font = font;
   }
 
-  constructor({ width, height, title, subtitle, padding = 0.05, ...other }: SquareMeme.ConstructorOptions<SquareMeme>) {
-    if (width) {
-      height = width;
-    } else {
-      width = height;
-    }
-    super({ ...other, width, height });
+  constructor({ title, subtitle, padding = 0.05, ...other }: TitledMeme.ConstructorOptions<TitledMeme>) {
+    super({ ...other });
     if (title) {
       this.title = typeof title === 'string' ? { text: title, ...other } : { ...other, ...title };
     }
@@ -79,8 +74,8 @@ export class SquareMeme extends BaseMeme {
   }
 }
 
-export namespace SquareMeme {
-  export type ConstructorOptions<T extends SquareMeme> = Partial<Meme.ConstructorOptions> & {
+export namespace TitledMeme {
+  export type ConstructorOptions<T extends TitledMeme> = Meme.ConstructorOptions & {
     title?: TitleLike<T>;
     subtitle?: TitleLike<T>;
     padding?: number;

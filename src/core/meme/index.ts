@@ -1,3 +1,3 @@
 export * from './base';
-export * from './square';
+export * from './titled';
 export * from './code';

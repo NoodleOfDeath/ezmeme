@@ -38,12 +38,11 @@
   ],
   "homepage": "https://github.com/noodleofdeath/ezmeme",
   "scripts": {
-    "gen": "ts-node index.ts gen",
+    "dev": "nodemon -x './serve.sh'",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
-    "prepare": "npm run build",
     "test": "mocha --inline-diffs --timeout 1000000 tests/run.js",
     "generate-interface": "ts-node ./tools/response-to-interface.ts",
     "generate-docs": "typedoc"
@@ -64,6 +63,7 @@
     "@types/node": "^18.11.18",
     "@types/styled-components": "^5.1.26",
     "@types/typescript": "^2.0.0",
+    "nodemon": "^2.0.20",
     "rimraf": "^4.0.5",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.2",

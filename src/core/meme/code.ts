@@ -1,7 +1,10 @@
-import { Font } from '@/core/components';
-import { SquareMeme } from '@/core/meme/square';
-import { DOMMetric } from '@/core/components/title';
 import hljs from 'highlight.js';
+import { registerFont } from 'canvas';
+import { Font } from '@/core/components';
+import { TitledMeme } from '@/core/meme/titled';
+import { DOMMetric } from '@/core/components/title';
+
+registerFont('DMMono-Regular.ttf', { family: 'DM Mono' });
 
 function removeHTMLChars(str: string): string {
   const HTML_CHAR_MAP = {
@@ -55,6 +58,9 @@ const TOKEN_STYLES: Record<string, TokenStyle> = {
   built_in: {
     fillStyle: 'lime',
   },
+  class: {
+    fillStyle: 'cyan',
+  },
   comment: {
     fillStyle: '#999',
     font: (fontSize, font) => `italic ${fontSize} ${font}`,
@@ -74,11 +80,20 @@ const TOKEN_STYLES: Record<string, TokenStyle> = {
   meta: {
     fillStyle: '#bbbbbb',
   },
+  name: {
+    fillStyle: '#ff8888',
+  },
   number: {
     fillStyle: '#aaaaff',
   },
+  operator: {
+    font: (fontSize, font) => `bold ${fontSize} ${font}`,
+  },
   params: {
     fillStyle: '#aaaaff',
+  },
+  punctuation: {
+    font: (fontSize, font) => `bold ${fontSize} ${font}`,
   },
   string: {
     fillStyle: '#88ff88',
@@ -91,7 +106,7 @@ const TOKEN_STYLES: Record<string, TokenStyle> = {
   },
   'title class_': {
     fillStyle: 'cyan',
-    },
+  },
   'title function_': {
     fillStyle: 'yellow',
   },
@@ -109,18 +124,32 @@ const TOKEN_STYLES: Record<string, TokenStyle> = {
   },
 };
 
-export class CodingMeme extends SquareMeme {
+export class CodingMeme extends TitledMeme {
   code: string;
   language: string;
   alias: string;
+  wrapText: boolean;
+  wrapColumn: number;
+  hangingIndent: number;
 
-  constructor({ code = '', language, alias, ...other }: CodingMeme.ConstructorOptions) {
+  constructor({
+    code = '',
+    language,
+    alias,
+    wrapText = true,
+    wrapColumn = 40,
+    hangingIndent = 2,
+    ...other
+  }: CodingMeme.ConstructorOptions) {
     super(other);
     this.code = code;
     this.language = MIME_TYPES[language] || language;
-    this.alias = alias ? 
-      (MIME_TYPE_ALIASES[alias] || MIME_TYPES[alias] || alias) : 
-      (MIME_TYPE_ALIASES[language] || MIME_TYPES[language] || language);
+    this.alias = alias
+      ? MIME_TYPE_ALIASES[alias] || MIME_TYPES[alias] || alias
+      : MIME_TYPE_ALIASES[language] || MIME_TYPES[language] || language;
+    this.wrapText = wrapText;
+    this.wrapColumn = wrapColumn;
+    this.hangingIndent = hangingIndent;
   }
 
   render(): Promise<void> {
@@ -128,16 +157,14 @@ export class CodingMeme extends SquareMeme {
     return new Promise(async (resolve, reject) => {
       await super.render().catch(reject);
       let longest = 0;
-      this.code.split('\n').forEach((line, i) => {
-        if (line.length > longest) {
-          longest = line.length;
-        }
+      this.code.split('\n').forEach((line) => {
+        if (line.length > longest) longest = line.length;
       });
-      longest += 4;
+      longest = Math.min(longest, this.wrapText ? this.wrapColumn : longest);
       const lines = removeHTMLChars(hljs.highlight(this.code, { language: this.language }).value).split('\n');
-      const charSize = Math.min(50, Math.floor((this.width * (1 - 2 * this.padding)) / (longest * 0.6)));
+      const charSize = Math.floor((this.width * (1 - 2 * this.padding)) / ((longest + 4) * 0.6));
       const fontSize: DOMMetric = `${charSize}px`;
-      const font = 'menlo';
+      const font = 'DM Mono';
       const defaultFont: Font = `normal ${fontSize} ${font}`;
       const defaultStyle: TokenStyle = {
         fillStyle: this.stroke,
@@ -145,32 +172,42 @@ export class CodingMeme extends SquareMeme {
       };
       const styleStack: TokenStyle[] = [];
       this.ctx.textAlign = 'left';
+      let yOffset = this.height * this.padding + 200;
       lines.forEach((line, i) => {
         const matches = line.matchAll(expr);
         const lineNumber = `${i + 1}| `.padStart(4, ' ');
+        let xCount = 0;
         let xOffset = this.width * this.padding;
-        const yOffset = this.height * this.padding + 200 + i * (charSize + this.lineSpacing);
         this.ctx.fillStyle = this.stroke;
         this.ctx.font = defaultFont;
         this.ctx.fillText(lineNumber, xOffset, yOffset);
         xOffset += this.ctx.measureText(lineNumber).width;
         if (!matches) return;
         for (const match of matches) {
-          const [_, type, closingTag, value] = match;
+          let [_, type, closingTag, value] = match;
           if (type) {
             const tokenStyle = TOKEN_STYLES[type ?? ''];
             if (!tokenStyle) {
               console.log(type);
             }
             styleStack.push(tokenStyle ?? defaultStyle);
-          } else
-          if (closingTag) {
+          } else if (closingTag) {
             styleStack.pop();
-          } else
-          if (value) {
+          } else if (value) {
+            if (xCount + value.trim().length > longest) {
+              const [indent] = line.match(/^\s*/);
+              xOffset = this.width * this.padding;
+              yOffset += charSize + this.lineSpacing;
+              const hangingLineNumber = `| `.padStart(4, ' ') + ''.padStart(indent.length + this.hangingIndent, ' ');
+              this.ctx.fillStyle = this.stroke;
+              this.ctx.font = defaultFont;
+              this.ctx.fillText(hangingLineNumber, xOffset, yOffset);
+              xCount = indent.length + this.hangingIndent;
+              xOffset += this.ctx.measureText(hangingLineNumber).width;
+              value = value.trimStart();
+            }
             const currentStyle = styleStack.length > 0 ? styleStack[styleStack.length - 1] : defaultStyle;
-            if (currentStyle.fillStyle)
-              this.ctx.fillStyle = currentStyle.fillStyle;
+            if (currentStyle.fillStyle) this.ctx.fillStyle = currentStyle.fillStyle;
             if (currentStyle.font instanceof Function) {
               this.ctx.font = currentStyle.font(fontSize, font);
             } else {
@@ -178,8 +215,10 @@ export class CodingMeme extends SquareMeme {
             }
             this.ctx.fillText(value, xOffset, yOffset);
             xOffset += this.ctx.measureText(value).width;
+            xCount += value.length;
           }
         }
+        yOffset += charSize + this.lineSpacing;
       });
       resolve();
     });
@@ -187,9 +226,12 @@ export class CodingMeme extends SquareMeme {
 }
 
 export namespace CodingMeme {
-  export type ConstructorOptions = SquareMeme.ConstructorOptions<CodingMeme> & {
+  export type ConstructorOptions = TitledMeme.ConstructorOptions<CodingMeme> & {
     code?: string;
     language?: string;
     alias?: string;
+    wrapText?: boolean;
+    wrapColumn?: number;
+    hangingIndent?: number;
   };
 }

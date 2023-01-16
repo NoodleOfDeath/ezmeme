@@ -1,0 +1,19 @@
+FROM node:16.15.0 as base
+RUN npm install -g pnpm
+RUN npm install -g ts-node
+RUN npm install -g http-server
+WORKDIR /home/node/app
+COPY package.json ./
+COPY tsconfig.json ./
+COPY tsconfig.build.json ./
+COPY nodemon.json ./
+RUN pnpm install
+
+FROM base as serve
+COPY DMMono-Regular.ttf ./
+COPY serve.sh ./
+RUN chmod +x serve.sh
+COPY index.ts ./
+COPY src ./src
+COPY code ./code
+CMD pnpm run dev

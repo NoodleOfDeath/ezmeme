@@ -8,7 +8,7 @@ export type FontStyle = 'bold' | 'italic' | 'normal';
 
 export type Font = `${DOMMetric} ${string}` | `${FontStyle} ${DOMMetric} ${string}`;
 
-export type Title<T extends Meme> = Component & {
+export type Title<T extends Meme = Meme> = Component & {
   text: string | ((meme: T) => string);
   stroke?: string;
   font?: Font;
@@ -16,4 +16,4 @@ export type Title<T extends Meme> = Component & {
   baseline?: CanvasTextBaseline;
 };
 
-export type TitleLike<T extends Meme> = string | Title<T>;
+export type TitleLike<T extends Meme = Meme> = string | Title<T>;
