@@ -27,7 +27,7 @@ addChoices(witoSubparser, 'wito');
 const fteSubparser = subparsers.add_parser('fte');
 addChoices(fteSubparser, 'fte');
 
-const snippetSubparser = subparsers.add_parser('snippets', { alias: ['snip'] });
+const snippetSubparser = subparsers.add_parser('snippets', { aliases: ['snip'] });
 addChoices(snippetSubparser, 'snippets');
 
 const args = parser.parse_args();
