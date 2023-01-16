@@ -38,6 +38,7 @@
   ],
   "homepage": "https://github.com/noodleofdeath/ezmeme",
   "scripts": {
+    "gen": "ts-node index.ts gen",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json -c tslint.json",

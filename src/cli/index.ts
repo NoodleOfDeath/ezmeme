@@ -2,52 +2,113 @@ import { ArgumentParser } from 'argparse';
 import * as fs from 'fs';
 import p from 'path';
 import { rimrafSync } from 'rimraf';
+
 import { CodingMeme } from '@/core';
+import { TitleLike } from '@/core/components/title';
+
+const SRC_ROOT = './snippets';
 
 const parser = new ArgumentParser();
 const subparsers = parser.add_subparsers();
 
-parser.set_defaults({ command: 'gen' });
+function addChoices(parser: ArgumentParser, type: string) {
+  const SRC = p.join(SRC_ROOT, type);
+  const choices = fs.readdirSync(SRC).map((c) => p.basename(c));
+  parser.set_defaults({ type });
+  parser.add_argument('group', {
+    nargs: "*",
+    default: choices,
+  });
+}
 
-const genSubparser = subparsers.add_parser('gen');
+const witoSubparser = subparsers.add_parser('wito');
+addChoices(witoSubparser, 'wito');
 
-genSubparser.add_argument('type', { choices: ['meme'] });
+const fteSubparser = subparsers.add_parser('fte');
+addChoices(fteSubparser, 'fte');
 
 const args = parser.parse_args();
-console.log(args);
 
-const src = './snippets/hello';
-const dst = `./out/${p.basename(src)}`;
+type MemeType = {
+  parser: any;
+  title?: TitleLike<CodingMeme>;
+  subtitle?: TitleLike<CodingMeme>;
+  background?: string;
+}
 
-rimrafSync('./out');
+const TYPES: Record<string, MemeType> = {
+  wito: {
+    parser: witoSubparser,
+    title: { 
+      text: (meme) => `what is the output?`,
+      font: '80% Menlo',
+    },
+    subtitle: { 
+      text: (meme) => `WITO\nLVL1\n${meme.alias.toUpperCase()}`,
+      align: 'right',
+      font: 'normal 40px Menlo',
+    },
+    background: '#212121',
+  },
+  fte: {
+    parser: fteSubparser,
+    title: { 
+      text: (meme) => `find the errors\n(and how many)`,
+      font: 'normal 60px Menlo',
+    },
+    subtitle: { 
+      text: (meme) => `FTE\nLVL1\n${meme.alias.toUpperCase()}`,
+      align: 'right',
+      font: 'normal 40px Menlo',
+    },
+    background: '#111144',
+  }
+}
 
+const TYPE = TYPES[args.type];
+
+const groups = 
+  args.group && args.group.length > 0 ? 
+  args.group : TYPE.parser.choices;
+  
 async function main() {
-  
-  const files = fs.readdirSync(src);
 
-  fs.mkdirSync(dst, { recursive: true });
+  for (const group of groups) {
   
-  for (const file of files) {
-  
-    console.log('-----', file);
-    const code = fs.readFileSync(`${src}/${file}`, 'utf-8');
-    const ext = file.match(/\.(.+)$/)[1];
+    const src = p.join(SRC_ROOT, args.type, group);
+    const dst = p.join('./out', args.type, group);
     
-    const meme = new CodingMeme({
-      width: 1200,
-      title: { 
-        text: (meme) => `${meme.langAlias.toUpperCase()}`,
-        font: '80% Menlo',
-      },
-      padding: 0.1,
-      code,
-      language: ext,
-    });
-    
-    await meme
-      .write(`${dst}/${file}.png`)
-      .catch(console.error);
+    if (fs.existsSync(dst))
+      rimrafSync(dst);
+      
+    const files = fs.readdirSync(src);
   
+    fs.mkdirSync(dst, { recursive: true });
+    
+    for (const file of files) {
+    
+      const code = fs.readFileSync(p.join(src, file), 'utf-8');
+      const [_, language] = file.match(/\.(.+)$/);
+    
+      const meme = new CodingMeme({
+        width: 1200,
+        title: TYPE.title,
+        subtitle: TYPE.subtitle,
+        padding: 0.1,
+        code,
+        language,
+        background: TYPE.background,
+      });
+      
+      console.log('-----', file);
+      console.log(meme.alias)
+      
+      await meme
+        .write(p.join(dst, `${file}.png`))
+        .catch(console.error);
+    
+    }
+    
   }
 
 }

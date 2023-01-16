@@ -1,2 +1,0 @@
-# @cometechthis
-print('Hello World!')

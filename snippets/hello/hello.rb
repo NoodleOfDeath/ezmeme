@@ -1,2 +1,0 @@
-# @cometechthis
-puts "Hello World!"

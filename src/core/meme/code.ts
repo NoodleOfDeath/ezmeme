@@ -15,15 +15,34 @@ function removeHTMLChars(str: string): string {
   return str.replace(new RegExp(Object.keys(HTML_CHAR_MAP).join('|'), 'g'), (matched) => HTML_CHAR_MAP[matched]);
 }
 
-const MIME_TYPE_ALIASES: Record<string, string> = {
+const MIME_TYPES: Record<string, string> = {
+  cpp: 'cpp',
+  h: 'c',
+  hpp: 'cpp',
+  hs: 'haskell',
+  f90: 'fortran',
+  jl: 'julia',
   js: 'javascript',
-  ts: 'typescript',
+  kt: 'kotlin',
+  m: 'c',
+  nb: 'mathematica',
+  mlx: 'matlab',
+  pl: 'perl',
   py: 'python',
   rb: 'ruby',
   rs: 'rust',
   sh: 'bash',
-  cpp: 'c++',
-  hpp: 'c++',
+  tex: 'latex',
+  ts: 'typescript',
+  'objc.m': 'objc',
+  'ui.swift': 'swift',
+};
+
+const MIME_TYPE_ALIASES: Record<string, string> = {
+  nb: 'wolfram/mathematica',
+  ts: 'javascript/typescript',
+  'objc.m': 'objective-c',
+  'ui.swift': 'swift-ui',
 };
 
 type TokenStyle = {
@@ -41,6 +60,9 @@ const TOKEN_STYLES: Record<string, TokenStyle> = {
   },
   doctag: {
     fillStyle: '#cc88cc',
+  },
+  function: {
+    fillStyle: 'yellow',
   },
   keyword: {
     fillStyle: '#ff8888',
@@ -74,7 +96,7 @@ const TOKEN_STYLES: Record<string, TokenStyle> = {
   },
   'title function_ invoke__': {
     fillStyle: 'yellow',
-    },
+  },
   type: {
     fillStyle: 'cyan',
   },
@@ -89,15 +111,15 @@ const TOKEN_STYLES: Record<string, TokenStyle> = {
 export class CodingMeme extends SquareMeme {
   code: string;
   language: string;
+  alias: string;
 
-  get langAlias(): string {
-    return MIME_TYPE_ALIASES[this.language] || this.language;
-  }
-
-  constructor({ code = '', language, ...other }: CodingMeme.ConstructorOptions) {
+  constructor({ code = '', language, alias, ...other }: CodingMeme.ConstructorOptions) {
     super(other);
     this.code = code;
-    this.language = language;
+    this.language = MIME_TYPES[language] || language;
+    this.alias = alias ? 
+      (MIME_TYPE_ALIASES[alias] || MIME_TYPES[alias] || alias) : 
+      (MIME_TYPE_ALIASES[language] || MIME_TYPES[language] || language);
   }
 
   render(): Promise<void> {
@@ -167,5 +189,6 @@ export namespace CodingMeme {
   export type ConstructorOptions = SquareMeme.ConstructorOptions<CodingMeme> & {
     code?: string;
     language?: string;
+    alias?: string;
   };
 }
