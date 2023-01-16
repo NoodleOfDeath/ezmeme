@@ -6,7 +6,7 @@ import { rimrafSync } from 'rimraf';
 import { CodingMeme } from '@/core';
 import { TitleLike } from '@/core/components/title';
 
-const SRC_ROOT = './snippets';
+const SRC_ROOT = './code';
 
 const parser = new ArgumentParser();
 const subparsers = parser.add_subparsers();
@@ -26,6 +26,9 @@ addChoices(witoSubparser, 'wito');
 
 const fteSubparser = subparsers.add_parser('fte');
 addChoices(fteSubparser, 'fte');
+
+const snippetSubparser = subparsers.add_parser('snippets', { alias: ['snip'] });
+addChoices(snippetSubparser, 'snippets');
 
 const args = parser.parse_args();
 
@@ -54,7 +57,7 @@ const TYPES: Record<string, MemeType> = {
     parser: fteSubparser,
     title: { 
       text: (meme) => `find the errors\n(and how many)`,
-      font: 'normal 60px Menlo',
+      font: '80% Menlo',
     },
     subtitle: { 
       text: (meme) => `FTE\nLVL1\n${meme.alias.toUpperCase()}`,
@@ -62,6 +65,14 @@ const TYPES: Record<string, MemeType> = {
       font: 'normal 40px Menlo',
     },
     background: '#111144',
+  },
+  snippets: {
+    parser: snippetSubparser,
+    title: { 
+      text: (meme) => `${meme.alias.toUpperCase()}`,
+      font: 'normal 60px Menlo',
+    },
+    background: '#441111',
   }
 }
 
