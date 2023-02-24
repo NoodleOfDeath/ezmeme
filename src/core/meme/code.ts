@@ -139,13 +139,13 @@ export class CodingMeme<T = any> extends TitledMeme {
     language,
     alias,
     wrapText = true,
-    wrapColumn = 40,
+    wrapColumn = 48,
     hangingIndent = 2,
     props,
     ...other
   }: CodingMeme.ConstructorOptions) {
     super(other);
-    this.code = code;
+    this.code = code.replace(/\n+$/, '');
     this.language = MIME_TYPES[language] || language;
     this.alias = alias
       ? MIME_TYPE_ALIASES[alias] || MIME_TYPES[alias] || alias
@@ -166,7 +166,14 @@ export class CodingMeme<T = any> extends TitledMeme {
       });
       longest = Math.min(longest, this.wrapText ? this.wrapColumn : longest);
       const lines = removeHTMLChars(hljs.highlight(this.code, { language: this.language }).value).split('\n');
-      const charSize = Math.floor((this.width * (1 - 2 * this.padding)) / ((longest + 4) * 0.6));
+      let yOffset = this.height * this.padding + 120;
+      const xCharSize = Math.floor((this.width * (1 - 2 * this.padding)) / ((longest + 4) * 0.6));
+      const yCharSize = Math.floor((this.height - yOffset) / (lines.length * 1.5));
+      const charSize = Math.min(xCharSize, yCharSize);
+      const initialXOffset = Math.max(
+        this.width * this.padding,
+        (this.width / 2) - ((charSize * 0.6 * (this.wrapColumn + Math.floor(Math.log10(lines.length)) + 1) / 2))
+        );
       const fontSize: DOMMetric = `${charSize}px`;
       const font = 'DM Mono';
       const defaultFont: Font = `normal ${fontSize} ${font}`;
@@ -176,12 +183,11 @@ export class CodingMeme<T = any> extends TitledMeme {
       };
       const styleStack: TokenStyle[] = [];
       this.ctx.textAlign = 'left';
-      let yOffset = this.height * this.padding + 200;
       lines.forEach((line, i) => {
         const matches = line.matchAll(expr);
         const lineNumber = `${i + 1}| `.padStart(4, ' ');
         let xCount = 0;
-        let xOffset = this.width * this.padding;
+        let xOffset = initialXOffset;
         this.ctx.fillStyle = this.stroke;
         this.ctx.font = defaultFont;
         this.ctx.fillText(lineNumber, xOffset, yOffset);
@@ -200,7 +206,7 @@ export class CodingMeme<T = any> extends TitledMeme {
           } else if (value) {
             if (xCount + value.trim().length > longest) {
               const [indent] = line.match(/^\s*/);
-              xOffset = this.width * this.padding;
+              xOffset = initialXOffset;
               yOffset += charSize + this.lineSpacing;
               const hangingLineNumber = `| `.padStart(4, ' ') + ''.padStart(indent.length + this.hangingIndent, ' ');
               this.ctx.fillStyle = this.stroke;

@@ -7,6 +7,9 @@ import { CodingMeme } from '@/core';
 import { TitleLike } from '@/core/components/title';
 
 const SRC_ROOT = './code';
+const IGNORE = [
+  'class',
+]
 
 const parser = new ArgumentParser();
 const subparsers = parser.add_subparsers();
@@ -71,7 +74,9 @@ const TYPES: Record<string, MemeType> = {
   snippets: {
     parser: snippetSubparser,
     title: {
-      text: (meme) => `${meme.alias.toUpperCase()}`,
+      text: (meme) => {
+        return `${meme.alias.toUpperCase()}`
+      },
       font: 'normal 60px dm mono',
     },
     background: '#441111',
@@ -94,15 +99,20 @@ async function main() {
     fs.mkdirSync(dst, { recursive: true });
 
     for (const file of files) {
-      const code = fs.readFileSync(p.join(src, file), 'utf-8');
       const [_, language] = file.match(/\.(.+)$/);
+      
+      if (IGNORE.includes(language)) {
+        console.log(`Skipping ${file}`);
+        continue;
+      }
+      const code = fs.readFileSync(p.join(src, file), 'utf-8');
 
       const meme = new CodingMeme({
         width: 1200,
         height: 1200,
         title: TYPE.title,
         subtitle: TYPE.subtitle,
-        padding: 0.05,
+        padding: 0.075,
         code,
         language,
         background: TYPE.background,
